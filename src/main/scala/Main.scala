@@ -1,6 +1,6 @@
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions.trim
+import org.apache.spark.sql.functions.{trim, collect_set}
 
 object Main extends App {
 
@@ -33,9 +33,13 @@ object Main extends App {
     val df = tables.head
 
     val columns = df.columns
-    val values = df.flatMap(_.getValuesMap[String](columns))
+    val cells = df.flatMap(_.getValuesMap[String](columns))
 
-    values.head(1)
+    val attributeSet = cells
+      .groupBy("_2").agg(collect_set("_1").as("attributes"))
+      .drop("_2")
+
+    attributeSet.head(1)
     println("DEBUGGER")
   }
 }
