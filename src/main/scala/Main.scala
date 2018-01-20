@@ -1,20 +1,22 @@
+import java.io.File
+
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
-import org.apache.log4j.Logger
-import org.apache.log4j.Level
 
 object Main extends App {
 
   override def main(args: Array[String]): Unit = {
-    Logger.getLogger("org").setLevel(Level.OFF)
-    Logger.getLogger("akka").setLevel(Level.OFF)
-    val sparkBuilder = SparkSession
-      .builder()
-      .appName("SparkTutorial")
-      .master("local[4]") // local, with 4 worker cores
-    val spark = sparkBuilder.getOrCreate()
-    import spark.implicits._
+    val appConfig: AppConfig = ArgParser.parseConifg(args)
+    println(appConfig)
+  }
 
-    val numbers = spark.createDataset((0 until 10).toList)
-    numbers.foreach(println(_))
+
+  def getFilesForDirectory(directory: String): List[File] = {
+    val parentDir = new File(directory)
+    if (parentDir.exists && parentDir.isDirectory) {
+        parentDir.listFiles.filter(_.isFile).toList
+    } else {
+      throw new IllegalArgumentException("%s is not a directory" format directory)
+    }
   }
 }
