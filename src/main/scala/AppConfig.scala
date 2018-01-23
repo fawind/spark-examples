@@ -3,9 +3,11 @@ import java.io.File
 case class AppConfig (cores: Int = 1, files: List[File] = List())
 
 object ArgParser {
-  def parseConifg(args: Array[String]): AppConfig = {
+  def parseConfig(args: Array[String]): AppConfig = {
     val parser = new scopt.OptionParser[AppConfig]("spark-uind") {
-      opt[Int]("cores").action((cores, config) => config.copy(cores = cores))
+      opt[Int]("cores").action((cores, config) =>
+        config.copy(cores = cores)
+      )
       opt[String]("path").action((path, config) => {
         val files = getFilesForDirectory(path)
         config.copy(files = files)
@@ -15,6 +17,7 @@ object ArgParser {
         config.copy(files = files)
       })
     }
+
     parser.parse(args, AppConfig()) match {
       case Some(config) => config
       case None => throw new IllegalArgumentException("No commandline args given")
