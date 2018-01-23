@@ -1,4 +1,3 @@
-import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 
@@ -77,8 +76,10 @@ object Main extends App with SparkSessionWrapper {
       println(dependent + " < " + references.mkString(","))
     })
 
-    // Keep Spark-UI alive
-    System.in.read
-    spark.stop()
+    // Keep spark-ui alive for debugging
+    if (appConfig.ui) {
+      System.in.read
+      spark.stop()
+    }
   }
 }

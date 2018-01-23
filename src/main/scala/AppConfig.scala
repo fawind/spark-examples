@@ -1,12 +1,22 @@
 import java.io.File
 
-case class AppConfig (cores: Int = 1, files: List[File] = List())
+case class AppConfig(
+  // Number of cores to use for spark session
+  cores: Int = 1,
+  // Whether to keep alive the spark-ui for debugging
+  ui: Boolean = false,
+  // List of CSV files to analyze for INDs
+  files: List[File] = List()
+)
 
 object ArgParser {
   def parseConfig(args: Array[String]): AppConfig = {
     val parser = new scopt.OptionParser[AppConfig]("spark-uind") {
       opt[Int]("cores").action((cores, config) =>
         config.copy(cores = cores)
+      )
+      opt[Boolean]("ui").action((ui, config) =>
+        config.copy(ui = ui)
       )
       opt[String]("path").action((path, config) => {
         val files = getFilesForDirectory(path)
