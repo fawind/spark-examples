@@ -65,9 +65,11 @@ object Main extends App with SparkSessionWrapper {
       .withColumnRenamed("ReduceAggregator(scala.collection.Seq)", "referenced")
       .withColumnRenamed("value", "dependent")
 
-    // Collect and print INDs
+    // Collect and print INDs in sorted order
     val inds = intersections
-      .filter(size(col("referenced")) > 0)
+      .filter(size($"referenced") > 0)
+      .withColumn("referenced", sort_array($"referenced"))
+      .sort($"dependent")
       .collect()
 
     inds.foreach(row => {
