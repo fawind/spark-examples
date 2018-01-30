@@ -5,9 +5,10 @@ object Main extends App with SparkSessionWrapper {
 
   override def main(args: Array[String]): Unit = {
     val appConfig: AppConfig = ArgParser.parseConfig(args)
-    println(appConfig)
-    disableLogging()
+    println(s"Number of cores: ${appConfig.cores}")
+    println(s"Datasets: ${appConfig.files}")
 
+    disableLogging()
     val spark = initSparkSession(appConfig)
     import spark.implicits._
 
@@ -75,7 +76,7 @@ object Main extends App with SparkSessionWrapper {
     })
 
     // Keep spark-ui alive for debugging
-    if (appConfig.ui) {
+    if (appConfig.debug) {
       System.in.read
       spark.stop()
     }

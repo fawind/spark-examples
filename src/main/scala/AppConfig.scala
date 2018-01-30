@@ -2,11 +2,13 @@ import java.io.File
 
 case class AppConfig(
   // Number of cores to use for spark session
-  cores: Int = 1,
-  // Whether to keep alive the spark-ui for debugging
-  ui: Boolean = false,
+  cores: Int = 4,
   // List of CSV files to analyze for INDs
-  files: List[File] = List()
+  files: List[File] = List(),
+  // Whether to keep alive the spark-ui for debugging
+  debug: Boolean = false,
+  // Default dir
+  defaultDirectory: String = "./TPCH"
 )
 
 object ArgParser {
@@ -15,8 +17,8 @@ object ArgParser {
       opt[Int]("cores").action((cores, config) =>
         config.copy(cores = cores)
       )
-      opt[Boolean]("ui").action((ui, config) =>
-        config.copy(ui = ui)
+      opt[Boolean]("debug").action((debug, config) =>
+        config.copy(debug = debug)
       )
       opt[String]("path").action((path, config) => {
         val files = getFilesForDirectory(path)
@@ -29,7 +31,11 @@ object ArgParser {
     }
 
     parser.parse(args, AppConfig()) match {
-      case Some(config) => config
+      case Some(config) =>
+        if (config.files.isEmpty) {
+          return config.copy(files = getFilesForDirectory(config.defaultDirectory))
+        }
+        config
       case None => throw new IllegalArgumentException("No commandline args given")
     }
   }
