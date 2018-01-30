@@ -1,7 +1,6 @@
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 
-
 object Main extends App with SparkSessionWrapper {
 
   override def main(args: Array[String]): Unit = {
@@ -15,26 +14,23 @@ object Main extends App with SparkSessionWrapper {
     // Read in dataframes from CSV files
     val tables: List[DataFrame] = appConfig.files.map(file => {
       val table = spark.read
+        .format("com.databricks.spark.csv")
         .option("inferSchema", "true")
         .option("header", "true")
         .option("delimiter", ";")
-        .csv(file.getAbsolutePath)
-
-      val df = table.columns
+        .load(file.getAbsolutePath)
+      table.columns
         .foldLeft(table) {(df, colName) =>
           df.withColumn(colName, trim(df.col(colName)))
         }
-      df
     })
 
     // Pull out (attribute, value) cells from all table relations
     val tableCells = tables.map(df => {
       val columns = df.columns
-      val cells = df
-        .flatMap(_.getValuesMap[String](columns))
+      df.flatMap(_.getValuesMap[String](columns))
         .withColumnRenamed("_1", "attribute")
         .withColumnRenamed("_2", "value")
-      cells
     })
     val allCells = tableCells.reduce(_ union _)
 
@@ -75,7 +71,7 @@ object Main extends App with SparkSessionWrapper {
     inds.foreach(row => {
       val dependent = row.getAs[String]("dependent")
       val references = row.getAs[Seq[String]]("referenced")
-      println(dependent + " < " + references.mkString(","))
+      println(dependent + " < " + references.mkString(", "))
     })
 
     // Keep spark-ui alive for debugging
